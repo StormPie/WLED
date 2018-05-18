@@ -1,4 +1,4 @@
-## Welcome to my project WLED!
+## Welcome to a UI update for WLED 
 
 WLED is a fast and (relatively) secure implementation of an ESP8266/ESP32 webserver to control NeoPixel (WS2812B) LEDs!
 
