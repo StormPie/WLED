@@ -44,7 +44,7 @@ String otaPass = "wledota";
 //#define USEFS
 
 //to toggle usb serial debug (un)comment following line(s)
-//#define DEBUG
+#define DEBUG
 
 //Hardware-settings (only changeble via code)
 #define PIN 2 //strip pin. Only change for ESP32
@@ -311,6 +311,8 @@ void reset()
 }
 
 void setup() {
+    pinMode(4, OUTPUT);
+    digitalWrite(4, HIGH);
     wledInit();
 }
 

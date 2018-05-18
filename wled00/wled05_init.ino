@@ -390,13 +390,13 @@ void serveIndex()
 {
   if (!arlsTimeout) //do not serve while receiving realtime
   {
-    server.setContentLength(strlen_P(PAGE_index0) + cssColorString.length() + strlen_P(PAGE_index1) + strlen_P(PAGE_index2) + strlen_P(PAGE_index3));
+    server.setContentLength(strlen_P(PAGE_index0)); // + cssColorString.length() + strlen_P(PAGE_index1) + strlen_P(PAGE_index2) + strlen_P(PAGE_index3));
     server.send(200, "text/html", "");
     server.sendContent_P(PAGE_index0);
-    server.sendContent(cssColorString); 
-    server.sendContent_P(PAGE_index1); 
-    server.sendContent_P(PAGE_index2);
-    server.sendContent_P(PAGE_index3);
+    //server.sendContent(cssColorString); 
+    //server.sendContent_P(PAGE_index1); 
+    //server.sendContent_P(PAGE_index2);
+    //server.sendContent_P(PAGE_index3);
   } else {
     server.send(200, "text/plain", "The WLED UI is not available while receiving real-time data.");
   }
