@@ -714,7 +714,7 @@ const char PAGE_index0[] PROGMEM = R"=====(
     </div>
     <p style="padding:15px; padding-bottom:0px;">Cycle Range</p>
     <section class="range-slider">
-      <span class="rangeValues" style="font-size:20px;"></span> <input max="16" min="1" step="1" type="range" value="1"> <input max="12" min="1" step="1" type="range" value="2">
+      <span class="rangeValues" style="font-size:20px;"></span> <input max="16" min="1" step="1" type="range" value="1"> <input max="16" min="1" step="1" type="range" value="2">
     </section>
     <div class="row segment cyclebtns" style="height:240px; padding-top:10px;">
       <ul style="padding:0px;">

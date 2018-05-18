@@ -5,7 +5,7 @@
 void wledInit()
 { 
   EEPROM.begin(EEPSIZE);
-  ledCount = ((EEPROM.read(229) << 0) & 0xFF) + ((EEPROM.read(398) << 8) & 0xFF00); if (ledCount > 1200) ledCount = 10;
+  ledCount = ((EEPROM.read(229) << 0) & 0xFF) + ((EEPROM.read(398) << 8) & 0xFF00); if (ledCount > 1200 || ledCount == 0) ledCount = 10;
   //RMT eats up too much RAM
   #ifdef ARDUINO_ARCH_ESP32
   if (ledCount > 600) ledCount = 600;
@@ -39,17 +39,11 @@ void wledInit()
     hueIP[1] = WiFi.localIP()[1];
     hueIP[2] = WiFi.localIP()[2];
   }
-  
-  // Set up mDNS responder:
-  if (cmDNS != NULL && !onlyAP && !MDNS.begin(cmDNS.c_str())) {
-    DEBUG_PRINTLN("Error setting up MDNS responder!");
-    down();
-  }
-  DEBUG_PRINTLN("mDNS responder started");
 
   if (udpPort > 0 && udpPort != ntpLocalPort && WiFi.status() == WL_CONNECTED)
   {
     udpConnected = notifierUdp.begin(udpPort);
+    if (udpConnected && udpRgbPort != udpPort) udpRgbConnected = rgbUdp.begin(udpRgbPort);
   }
   if (ntpEnabled && WiFi.status() == WL_CONNECTED)
   ntpConnected = ntpUdp.begin(ntpLocalPort);
@@ -180,6 +174,12 @@ void wledInit()
     val += "mA currently";
     serveMessage(200,val,"This is just an estimate (does not take into account several factors like effects and wire resistance). It is NOT an accurate measurement!",254);
     });
+
+  server.on("/u", HTTP_GET, [](){
+    server.setContentLength(strlen_P(PAGE_usermod));
+    server.send(200, "text/html", "");
+    server.sendContent_P(PAGE_usermod);
+    });
     
   server.on("/teapot", HTTP_GET, [](){
     serveMessage(418, "418. I'm a teapot.","(Tangible Embedded Advanced Project Of Twinkling)",254);
@@ -237,8 +237,6 @@ void wledInit()
 
   server.begin();
   DEBUG_PRINTLN("HTTP server started");
-  // Add service to MDNS
-  MDNS.addService("http", "tcp", 80);
 
   //init ArduinoOTA
   if (aOtaEnabled)
@@ -249,8 +247,19 @@ void wledInit()
       #endif
       DEBUG_PRINTLN("Start ArduinoOTA");
     });
+    if (cmDNS.length() > 0) ArduinoOTA.setHostname(cmDNS.c_str());
     ArduinoOTA.begin();
   }
+
+  if (!initLedsLast) strip.service();
+  // Set up mDNS responder:
+  if (cmDNS.length() > 0 && !onlyAP)
+  {
+    MDNS.begin(cmDNS.c_str());
+    DEBUG_PRINTLN("mDNS responder started");
+    // Add service to MDNS
+    MDNS.addService("http", "tcp", 80);
+  } 
 
   if (initLedsLast) initStrip();
   userBegin();
@@ -268,6 +277,8 @@ void initStrip()
   strip.start();
 
   pinMode(buttonPin, INPUT_PULLUP);
+  //pinMode(4,OUTPUT); //this is only needed in special cases
+  //digitalWrite(4,LOW);
 
   if (bootPreset>0) applyPreset(bootPreset, turnOnAtBoot, true, true);
   colorUpdated(0);
@@ -388,9 +399,9 @@ void serveIndexOrWelcome()
 
 void serveIndex()
 {
-  if (!arlsTimeout) //do not serve while receiving realtime
+  if (!arlsTimeout || enableRealtimeUI) //do not serve while receiving realtime
   {
-    server.setContentLength(strlen_P(PAGE_index0)); // + cssColorString.length() + strlen_P(PAGE_index1) + strlen_P(PAGE_index2) + strlen_P(PAGE_index3));
+    server.setContentLength(strlen_P(PAGE_index0));// + cssColorString.length() + strlen_P(PAGE_index1) + strlen_P(PAGE_index2) + strlen_P(PAGE_index3));
     server.send(200, "text/html", "");
     server.sendContent_P(PAGE_index0);
     //server.sendContent(cssColorString); 
@@ -436,7 +447,7 @@ void serveMessage(int code, String headl, String subl="", int optionType)
 void serveSettings(byte subPage)
 {
   //0: menu 1: wifi 2: leds 3: ui 4: sync 5: time 6: sec 255: welcomepage
-  if (!arlsTimeout) //do not serve while receiving realtime
+  if (!arlsTimeout || enableRealtimeUI) //do not serve while receiving realtime
     {
       int pl0, pl1;
       switch (subPage)
@@ -514,7 +525,7 @@ String getBuildInfo()
   #else
   info += "strip-pin: gpio2\r\n";
   #endif
-  info += "build-type: src\r\n";
+  info += "build-type: dev\r\n";
   return info;
 }
 
