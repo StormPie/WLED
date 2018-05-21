@@ -1041,10 +1041,10 @@ const char PAGE_index0[] PROGMEM = R"=====(
      var cg = pc.g;
      var cb = pc.b;
      if (document.querySelector('.onoffswitch-checkbox').checked == true) {
-         var rgburl = "/win&A=100&R2=" + cr + "&G2=" + cg + "&B2=" + cb;
+         var rgburl = "/win&R2=" + cr + "&G2=" + cg + "&B2=" + cb;
      }
      if (document.querySelector('.onoffswitch-checkbox').checked == false) {
-         var rgburl = "/win&A=100&R=" + cr + "&G=" + cg + "&B=" + cb;
+         var rgburl = "/win&R=" + cr + "&G=" + cg + "&B=" + cb;
      }
      LEDCommand(rgburl);
 
