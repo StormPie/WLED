@@ -597,7 +597,7 @@ const char PAGE_index0[] PROGMEM = R"=====(
    box-shadow: rgba(255,255,255,1) 0 0 80px;
   }
 
-  .someButtons{
+  .someButtons img{
     height:50px;
     width:50px;
     float:left;
